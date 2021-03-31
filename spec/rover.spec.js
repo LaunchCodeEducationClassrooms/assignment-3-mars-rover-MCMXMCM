@@ -40,7 +40,7 @@ describe("Rover class", function() {
     let commands = [new Command('STATUS_CHECK')];
     let message = new Message("New Message!", commands);
     let response = rover.receiveMessage(message);
-    expect(response.results[0].roverStatus.mode).toEqual("NORMAL" || "LOW_POWER");
+    expect(response.results[0].roverStatus.mode).toEqual("NORMAL");
   }
   );
 
@@ -49,7 +49,6 @@ describe("Rover class", function() {
     let commands = [new Command('MODE_CHANGE', 'LOW_POWER')];
     let message = new Message("New Message!", commands) 
     let beforeModeChangeRoverMode = rover.mode
-    console.log(beforeModeChangeRoverMode)
     rover.receiveMessage(message);
     let afterModeChangeRoverMode = rover.mode
     let response = rover.receiveMessage(message)
@@ -59,7 +58,6 @@ describe("Rover class", function() {
 
  it("responds with false completed value when attempting to move in LOW_POWER mode", function() {
     let rover = new Rover(1234, "LOW_POWER", 50);
-    console.log(rover.mode);
     let command = [new Command('MOVE', 20)];
     let message = new Message("New Message!", command);
     let response = rover.receiveMessage(message);
@@ -68,12 +66,10 @@ describe("Rover class", function() {
 
   it("responds with position for move command", function() {
     let rover = new Rover(1234);
-    let command = [new Command('MOVE', 20)];
+    let command = [new Command('MOVE', 20), new Command('STATUS_CHECK')];
     let message = new Message("New Message!", command);
-    let startingPosition = rover.position;
-    rover.receiveMessage(message);
-    let updatedPosition = rover.position;
-    expect(startingPosition === updatedPosition).toBeFalse();
+    let response = rover.receiveMessage(message);
+    expect(response.results[1].roverStatus.position).toEqual(20);
   });
 
 

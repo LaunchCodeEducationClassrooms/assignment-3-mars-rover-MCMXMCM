@@ -8,41 +8,39 @@ class Rover {
  receiveMessage(message) {
     let messageName = message.name;
     let messageCommands = message.commands;
-    let completedStatus = {completed: false};
-    let finalResultsArray = [];
-    let statusChecked = false;
+    let finalResults = {
+      message: message.name,
+      results: []
+    }
       for (let i = 0; i < messageCommands.length; i++){
+        let completedStatus = {completed: ''}
         if (messageCommands[i].commandType === 'MODE_CHANGE') {
-          this.mode = messageCommands[i].value;
-          completedStatus.completed = true;
-          finalResultsArray.push(completedStatus);
+           this.mode = messageCommands[i].value;
+            completedStatus.completed = true;
+            finalResults.results.push(completedStatus)
+        } else if (messageCommands[i].commandType === 'MOVE') {
+            if (this.mode === "LOW_POWER") {
+              completedStatus.completed = false;
+              finalResults.results.push(completedStatus);
+            } else {
+              this.position = messageCommands[i].value;
+              completedStatus.completed = true;
+              finalResults.results.push(completedStatus)
+            }
+        } else if (this.mode === "LOW_POWER" && messageCommands[i].commandType === 'MOVE') {
+            
         } else if (messageCommands[i].commandType === 'STATUS_CHECK'){
-          completedStatus.completed = true;
-          statusChecked = true;          
-        } else if (messageCommands[i].commandType === 'MOVE' && this.mode === "NORMAL") {
-          this.position = messageCommands[i].value;
-          completedStatus.completed = true;
-          finalResultsArray.push(completedStatus.completed)
-        } else if (messageCommands[i].commandType === 'MOVE' && this.mode === "LOW_POWER") {
-          completedStatus.completed = false;
-          finalResultsArray.push(completedStatus);
-        }
-      }
-      let roverStatusReport = {
-          completed: completedStatus.completed,
-          roverStatus: {
+            let roverStatus = {
             mode: this.mode,
             generatorWatts: this.generatorWatts,
             position: this.position
-          }
+          } 
+            finalResults.results.push({roverStatus});
         }
-
-      if (statusChecked) {
         
-        finalResultsArray.push(roverStatusReport)
       }
-      
-    return {message: messageName, results: finalResultsArray};
+      return finalResults;
+
   }
 }
 
